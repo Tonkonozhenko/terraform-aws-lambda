@@ -412,9 +412,10 @@ Few notes:
     !abc/def/hgk/.*    # Filter out again in abc/def/hgk sub folder
 ```
 
-- `commands` - List of commands to run. If specified, this argument overrides `pip_requirements`.
+- `commands` - List of commands to run. If specified, this argument overrides `pip_requirements` and `poetry_install`.
   - `:zip [source] [destination]` is a special command which creates content of current working directory (first argument) and places it inside of path (second argument).
 - `pip_requirements` - Controls whether to execute `pip install`. Set to `false` to disable this feature, `true` to run `pip install` with `requirements.txt` found in `path`. Or set to another filename which you want to use instead.
+- `poetry_install` - Controls whether to execute `poetry install`. Set to `false` to disable this feature, `true` to run `poetry install` with existing `pyproject.toml` and optionally `poetry.lock` found in `path`.
 - `prefix_in_zip` - If specified, will be used as a prefix inside zip-archive. By default, everything installs into the root of zip-archive.
 
 ### Building in Docker

@@ -17,17 +17,50 @@ resource "random_pet" "this" {
 # Build packages
 #################
 
-# Create zip-archive of a single directory where "pip install" will also be executed (default for python runtime)
+# Create zip-archive of a single directory where "pip install" will also be executed (default for python runtime with requirements.txt present)
 module "package_dir" {
   source = "../../"
 
   create_function = false
 
-  runtime     = "python3.8"
-  source_path = "${path.module}/../fixtures/python3.8-app1"
+  build_in_docker = true
+  runtime         = "python3.8"
+  source_path     = "${path.module}/../fixtures/python3.8-app1"
+  artifacts_dir   = "${path.root}/builds/package_dir/"
 }
 
-# Create zip-archive of a single directory without running "pip install" (which is default for python runtime)
+# Create zip-archive of a single directory where "poetry install" will also be executed
+module "package_dir_poetry" {
+  source = "../../"
+
+  create_function = false
+
+  build_in_docker = true
+  runtime         = "python3.8"
+  source_path = [
+    {
+      path = "${path.module}/../fixtures/python3.8-app-poetry"
+      patterns = [
+        "!(.*/)*__pycache__/.*",
+        "!_distutils_hack/.*",
+        "!.pytest_cache/.*",
+        "!.venv/.*",
+        "!_virtualenv.pth",
+        "!_virtualenv.py",
+        "!distutils-precedence.pth",
+        "!easy_install.py",
+        "!(pip|pip-.*)(\\.virtualenv|/.*)",
+        "!(pkg_resources|pkg_resources-.*)(\\.virtualenv|/.*)",
+        "!(setuptools|setuptools-.*)(\\.virtualenv|/.*)",
+        "!(wheel|wheel-.*)(\\.virtualenv|/.*)",
+      ]
+      poetry_install = true
+    }
+  ]
+  artifacts_dir = "${path.root}/builds/package_dir_poetry/"
+}
+
+# Create zip-archive of a single directory without running "pip install" (default for python runtime with requirements.txt present)
 module "package_dir_without_pip_install" {
   source = "../../"
 
@@ -227,6 +260,44 @@ module "lambda_layer" {
   build_in_docker = true
   runtime         = "python3.8"
   docker_file     = "${path.module}/../fixtures/python3.8-app1/docker/Dockerfile"
+  docker_image    = "lambci/lambda:build-python3.8"
+  artifacts_dir   = "${path.root}/builds/lambda_layer/"
+}
+
+module "lambda_layer_poetry" {
+  source = "../../"
+
+  create_layer        = true
+  layer_name          = "${random_pet.this.id}-layer-poetry-dockerfile"
+  compatible_runtimes = ["python3.8"]
+
+  source_path = [
+    {
+      path = "${path.module}/../fixtures/python3.8-app-poetry"
+      patterns = [
+        "!(.*/)*__pycache__/.*",
+        "!_distutils_hack/.*",
+        "!.pytest_cache/.*",
+        "!.venv/.*",
+        "!_virtualenv.pth",
+        "!_virtualenv.py",
+        "!distutils-precedence.pth",
+        "!easy_install.py",
+        "!(pip|pip-.*)(\\.virtualenv|/.*)",
+        "!(pkg_resources|pkg_resources-.*)(\\.virtualenv|/.*)",
+        "!(setuptools|setuptools-.*)(\\.virtualenv|/.*)",
+        "!(wheel|wheel-.*)(\\.virtualenv|/.*)",
+      ]
+      poetry_install = true
+    }
+  ]
+  hash_extra = "extra-hash-to-prevent-conflicts-with-module.package_dir"
+
+  build_in_docker = true
+  runtime         = "python3.8"
+  docker_file     = "${path.module}/../fixtures/python3.8-poetry/docker/Dockerfile"
+  docker_image    = "lambci/lambda:build-python3.8"
+  artifacts_dir   = "${path.root}/builds/lambda_layer_poetry/"
 }
 
 #######################
