@@ -1028,7 +1028,7 @@ def install_poetry_dependencies(query, path):
             poetry_commands = [
                 shlex_join([ poetry_exec, "config", "--no-interaction", "virtualenvs.create", "true" ]),
                 shlex_join([ poetry_exec, "config", "--no-interaction", "virtualenvs.in-project", "true" ]),
-                shlex_join([ poetry_exec, "install", "--no-interaction" ]),
+                shlex_join([ poetry_exec, "install", "--no-interaction", "--no-dev" ]),
             ]
             if docker:
                 with_ssh_agent = docker.with_ssh_agent
