@@ -1061,7 +1061,7 @@ def install_poetry_dependencies(query, path):
                 cmd_log.info(poetry_commands)
                 log_handler and log_handler.flush()
                 for poetry_command in poetry_commands:
-                    check_call(poetry_command, env=subproc_env)
+                    subprocess.run(poetry_command, env=subproc_env)
 
             # FIXME: not really needed as only the content of a subdirectory is exposed
             os.remove(poetry_lock_target_file)
